@@ -21,8 +21,8 @@ import java.util.Map;
 public class HepOpt {
     HepPlanner hepPlanner;
     RelToSqlConverter converter;
-    // 如果修改了rule2ruleset , 一定要修改 standard.txt
-    // 以下是rule列表,键值对分别为 rule名称 和 List<RelOptRule>类型
+    
+    
     Map<String, List<RelOptRule>> rule2ruleset = Map.of("rule_agg",
             Arrays.<RelOptRule> asList(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES,
                     CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN, CoreRules.AGGREGATE_JOIN_TRANSPOSE_EXTENDED,
@@ -58,22 +58,22 @@ public class HepOpt {
     Map<String, List<Boolean>> select_rule2ruleset_bitmap;
     Map<String, Pair<String, Integer>> rule2classidx;
 
-    // todo different rules
+    
     public HepOpt() throws IOException {
         HepProgramBuilder builder = new HepProgramBuilder();
         this.hepPlanner = new HepPlanner(builder.addMatchOrder(HepMatchOrder.TOP_DOWN).build());
         this.select_rule2ruleset_bitmap = new HashMap<>();
         this.rule2classidx = new HashMap<>();
-        // todo different dialects
-        for (Map.Entry<String, List<RelOptRule>> entry : rule2ruleset.entrySet()) { // Initialize
-                                                                                    // select_rule2ruleset_bitmap.
+        
+        for (Map.Entry<String, List<RelOptRule>> entry : rule2ruleset.entrySet()) { 
+                                                                                    
             List<Boolean> select_bitmap = new ArrayList<>();
             for (int i = 0; i < entry.getValue().size(); ++i) {
-                select_bitmap.add(Boolean.FALSE); // default : use no rules.
+                select_bitmap.add(Boolean.FALSE); 
             }
             select_rule2ruleset_bitmap.put(entry.getKey(), select_bitmap);
         }
-        initrule2classidx(); // Initialize rule2classidx;
+        initrule2classidx(); 
         updateSelectBitmap();
         this.converter = new RelToSqlConverter(PostgresqlSqlDialect.DEFAULT);
     }
@@ -121,7 +121,7 @@ public class HepOpt {
         String line = null;
         while (!Objects.equals(line = bufReader.readLine(), null)) {
             if (SingleAddRule(line)) {
-                // System.out.println("\u001B[32m" + line + " was added" + " successfully." + "\u001B[0m");
+                
             } else {
                 System.out.println("\u001B[31m" + "Failed to add rule " + line
                         + ": The rule is NOT in \"standard.txt\", plz check if your spelling is correct."
@@ -130,34 +130,34 @@ public class HepOpt {
         }
     }
 
-    //
+    
     public void updateRule(String rule) {
         HepProgramBuilder builder = new HepProgramBuilder();
         for (int i = 0; i < this.rule2ruleset.get(rule).size(); ++i) {
-            // 遍历当前rule的集合⬇
-            RelOptRule rule_instance = rule2ruleset.get(rule).get(i); // 获取rule集中的当前rule实例
+            
+            RelOptRule rule_instance = rule2ruleset.get(rule).get(i); 
             Boolean selected = select_rule2ruleset_bitmap.get(rule).get(i);
             if (selected) {
-                // 如果该实例已经被选择过
-                builder.addRuleInstance(rule_instance); // 添加这个实例
-                // System.out.println(rule_instance.toString() + " RuleInstance is selected");
-                // 打印通知,这里可以省略
+                
+                builder.addRuleInstance(rule_instance); 
+                
+                
             }
-            // else
-            // System.out.println(rule_instance.toString() + " RuleInstance is not selected");
+            
+            
         }
         this.hepPlanner = new HepPlanner(builder.addMatchOrder(HepMatchOrder.TOP_DOWN).build());
     }
 
     public List findBest(RelNode relNode) {
 
-        List res = new ArrayList(); // 这个用来存储结果
-        RelNode finalNode = relNode; // 暂存初始节点
+        List res = new ArrayList(); 
+        RelNode finalNode = relNode; 
         for (int i = 0; i < 5; i++) {
             this.hepPlanner.setRoot(finalNode);
             finalNode = this.hepPlanner.findBestExp();
         }
-        // 经历五次迭代,都是先设置为根节点,然后给出最佳结果
+        
 
         res.add(finalNode);
         String new_sql = converter.visitRoot(finalNode).asStatement().toSqlString(PostgresqlSqlDialect.DEFAULT)
@@ -165,6 +165,6 @@ public class HepOpt {
         res.add(new_sql);
         res.add(this.hepPlanner.getRules());
         return res;
-        // 最终结果包含三个部分 : 1.最优结果节点RelNode 2.sql语句String 3.使用的规则列表
+        
     }
 }

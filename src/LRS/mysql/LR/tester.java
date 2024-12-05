@@ -10,42 +10,6 @@ import java.util.Set;
 public class tester {
     static int k = 0;
 
-    public static void main(String[] args) throws IOException {
-        try {
-            String sqlPath = "src/sqlancer/mysql/LR/tpch10000.txt";
-            ArrayList<String> queries = new ArrayList<>();
-            try (BufferedReader br = new BufferedReader(new FileReader(sqlPath))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] parts = line.split(";");
-                    for (String part : parts) {
-                        queries.add(part.trim());
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            int k = 0;
-            for (String query : queries) {
-                System.out.println(k++);
-                // 重写
-                ArrayList<String> rewrite_queries = tester.rewrite(query);
-                // 重写出一堆重重写查询
-                System.out.println("重写了" + rewrite_queries.size() + "个结果：");
-                for (String rewrite_query : rewrite_queries) {
-                    if (!compareQueries(query, rewrite_query)) {
-                        System.out.println("\033[0;36m" + "发现错误！！！" + "\033[0;36m");
-                        String record = query + "@" + rewrite_query + "@@";
-                        writeStringToFile(record);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("嘻嘻,bug 了");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public static ArrayList<String> rewrite(String query) throws Exception {
         k++;
@@ -59,13 +23,13 @@ public class tester {
     }
 
     public static boolean compareQueries(String query1, String query2) {
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tpcd", "root", "1368");
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/tpcd");
                 Statement stmt1 = connection.createStatement(); Statement stmt2 = connection.createStatement()) {
             ResultSet rs1 = null;
             ResultSet rs2 = null;
             Set<List<Object>> resultSet1 = new HashSet<>();
             Set<List<Object>> resultSet2 = new HashSet<>();
-            // 执行第一个查询
+            
             try {
                 rs1 = stmt1.executeQuery(query1);
                 resultSet1 = convertResultSetToSet(rs1);
@@ -115,7 +79,7 @@ public class tester {
         String filePath = "src/test_records.txt";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
             writer.write(content);
-            writer.newLine(); // 写入新行
+            writer.newLine(); 
             System.out.println("Content written to file successfully.");
         } catch (IOException e) {
             System.err.println("Error writing to file: " + e.getMessage());

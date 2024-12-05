@@ -31,7 +31,6 @@ public class Utils {
                 fw.write(str);
                 fw.flush();
                 fw.close();
-                System.out.println("执行完毕!");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,15 +110,13 @@ public class Utils {
             columnRexNode = predicates.getOperands().get(1);
             valueRexNode = predicates.getOperands().get(0);
         } else {
-            System.out.println("意外之喜predicates:" + predicates);
             return null;
         }
         System.out.println("columnRexNode:" + columnRexNode);
         System.out.println("valueRexNode:" + valueRexNode);
 
         if (columnRexNode.isA(collection)) {
-            // 过滤列的加减乘除
-            System.out.println("列的加减乘除不能处理");
+            
             return null;
         }
         String reg = "\\$\\d+";
@@ -129,19 +126,18 @@ public class Utils {
         if (m.find()) {
             columnIndex = Integer.parseInt(m.group().replace("$", ""));
         } else {
-            // 未发现列的索引
+            
             return null;
         }
         String valueString = valueRexNode.toString();
-        // 数值的加减乘除计算
+        
         if (valueRexNode.isA(collection)) {
             valueString = Utils.calculateRexNodeString(valueString);
         } else {
-            // 去掉DECIMAL标识
+            
             valueString = Utils.formatRexNodeString(valueString);
         }
         if (valueString.contains("$")) {
-            System.out.println("Value值中有列:" + valueString);
             return null;
         }
         String oper = predicates.getOperator().toString();
@@ -170,7 +166,7 @@ public class Utils {
                         resList.addAll(res);
                     }
                 }
-                // System.out.println("process_clause if 结束:" + resList.toJSONString());
+                
                 return resList;
             } else {
                 Collection<SqlKind> collection = new ArrayList();
@@ -178,10 +174,10 @@ public class Utils {
                 collection.add(SqlKind.MINUS);
                 collection.add(SqlKind.TIMES);
                 collection.add(SqlKind.DIVIDE);
-                // System.out.println("process_clause else 开始:" + predicates);
+                
                 JSONArray resList = new JSONArray();
                 if (predicates.getOperands().size() == 0) {
-                    // System.out.println("process_clause else 结束:" + resList.toJSONString());
+                    
                     return resList;
                 } else if (predicates.getOperands().size() == 1) {
                     if (!(predicates.getOperands().get(0) instanceof RexInputRef)) {
@@ -189,13 +185,13 @@ public class Utils {
                         RexCall subpred = (RexCall) predicates.getOperands().get(0);
                         JSONArray res = process_clause(subpred, logic_oper, node);
                         resList.addAll(res);
-                        // System.out.println("process_clause else 结束:" + resList.toJSONString());
+                        
                         return resList;
                     }
                 } else {
                     if (!(predicates.getOperands().get(1) instanceof RexInputRef)) {
                         String operand1 = predicates.getOperands().get(0).toString();
-                        // 过滤列的加减乘除
+                        
                         if (predicates.getOperands().get(0).isA(collection)) {
                             return resList;
                         }
@@ -212,11 +208,11 @@ public class Utils {
                         String column_name = tableNcolumn.split("\\.")[1];
                         String operand2 = predicates.getOperands().get(1).toString();
 
-                        // 数值的加减乘除计算
+                        
                         if (predicates.getOperands().get(1).isA(collection)) {
                             operand2 = Utils.calculateRexNodeString(operand2);
                         } else {
-                            // 去掉DECIMAL标识
+                            
                             operand2 = Utils.formatRexNodeString(operand2);
                         }
 
@@ -230,7 +226,7 @@ public class Utils {
                     } else if (!(predicates.getOperands().get(0) instanceof RexInputRef)) {
                         String operand1 = predicates.getOperands().get(1).toString();
 
-                        // 过滤列的加减乘除
+                        
                         if (predicates.getOperands().get(1).isA(collection)) {
                             return resList;
                         }
@@ -247,11 +243,11 @@ public class Utils {
                         String tableNcolumn = get_relative_columns_with_type(node.getInputs(), column_index);
                         String column_name = tableNcolumn.split("\\.")[1];
                         String operand2 = predicates.getOperands().get(0).toString();
-                        // 数值的加减乘除计算
+                        
                         if (predicates.getOperands().get(0).isA(collection)) {
                             operand2 = Utils.calculateRexNodeString(operand2);
                         } else {
-                            // 去掉DECIMAL标识
+                            
                             operand2 = Utils.formatRexNodeString(operand2);
                         }
                         JSONObject predicate_json = new JSONObject();
@@ -391,7 +387,7 @@ public class Utils {
         if (node.parent == null) {
             System.out.println("Original Query");
             System.out.println(node.state_rel.explain());
-            // System.out.println(node.activatedRules);
+            
             return;
         }
         dfs_mtcs_tree(node.parent, depth + 1);

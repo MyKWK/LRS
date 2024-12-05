@@ -20,31 +20,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.JCommander.Builder;
 
-import LRS.citus.CitusProvider;
-import LRS.clickhouse.ClickHouseProvider;
-import LRS.cnosdb.CnosDBProvider;
-import LRS.cockroachdb.CockroachDBProvider;
 import LRS.common.log.Loggable;
 import LRS.common.query.Query;
 import LRS.common.query.SQLancerResultSet;
-import LRS.databend.DatabendProvider;
-import LRS.doris.DorisProvider;
-import LRS.duckdb.DuckDBProvider;
-import LRS.h2.H2Provider;
-import LRS.hsqldb.HSQLDBProvider;
 import LRS.mariadb.MariaDBProvider;
-import LRS.materialize.MaterializeProvider;
 import LRS.mysql.MySQLProvider;
 import LRS.oceanbase.OceanBaseProvider;
-import LRS.postgres.PostgresProvider;
-import LRS.presto.PrestoProvider;
-import LRS.questdb.QuestDBProvider;
-import LRS.sqlite3.SQLite3Provider;
-import LRS.stonedb.StoneDBProvider;
 import LRS.tidb.TiDBProvider;
-import LRS.timescaledb.TimescaleDBProvider;
-import LRS.yugabyte.ycql.YCQLProvider;
-import LRS.yugabyte.ysql.YSQLProvider;
 
 public final class Main {
 
@@ -266,7 +248,7 @@ public final class Main {
                 try {
                     reduceFileWriter.flush();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
+                    
                     e.printStackTrace();
                 }
             }
@@ -288,7 +270,7 @@ public final class Main {
                 try {
                     reduceFileWriter.flush();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
+                    
                     e.printStackTrace();
                 }
             }
@@ -318,7 +300,7 @@ public final class Main {
 
         private void printState(FileWriter writer, StateToReproduce state) {
             StringBuilder sb = new StringBuilder();
-            // 这里输出日志信息，包括使用了哪个数据库
+            
             sb.append(databaseProvider.getLoggableFactory()
                     .getInfo(state.getDatabaseName(), state.getDatabaseVersion(), state.getSeedValue()).getLogString());
 
@@ -334,9 +316,9 @@ public final class Main {
 
         private String removeNamesFromQueryPlans(String queryPlan) {
             String result = queryPlan;
-            result = result.replaceAll("t[0-9]+", "t0"); // Avoid duplicate tables
-            result = result.replaceAll("v[0-9]+", "v0"); // Avoid duplicate views
-            result = result.replaceAll("i[0-9]+", "i0"); // Avoid duplicate indexes
+            result = result.replaceAll("t[0-9]+", "t0"); 
+            result = result.replaceAll("v[0-9]+", "v0"); 
+            result = result.replaceAll("i[0-9]+", "i0"); 
             return result + "\n";
         }
     }
@@ -382,16 +364,16 @@ public final class Main {
     }
 
     public static void main(String[] args) {
-//        try {
-//            // 创建日志文件
-//            FileOutputStream fos = new FileOutputStream("console_output.log", false);
-//            PrintStream ps = new PrintStream(fos);
-//            // 重定向标准输出和标准错误
-//            System.setOut(ps);
-//            System.setErr(ps);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+
+
+
+
+
+
+
+
+
+
         System.exit(executeMain(args));
     }
 
@@ -434,8 +416,8 @@ public final class Main {
         }
 
         public void run() throws Exception {
-            G state = createGlobalState(); // 这里不是创建而是传递,将provider的state传递过来了
-            stateToRepro = provider.getStateToReproduce(databaseName); // mysql
+            G state = createGlobalState(); 
+            stateToRepro = provider.getStateToReproduce(databaseName); 
             stateToRepro.seedValue = r.getSeed();
             state.setState(stateToRepro);
             logger = new StateLogger(databaseName, provider, options);
@@ -445,27 +427,27 @@ public final class Main {
             state.setDbmsSpecificOptions(command);
 
             try (C con = provider.createDatabase(state)) {
-                // createDatabase方法里包含了要使用的数据库
+                
                 if (con == null)
                     System.out.println("con is null");
                 QueryManager<C> manager = new QueryManager<>(state);
                 try {
                     stateToRepro.databaseVersion = con.getDatabaseVersion();
                 } catch (Exception e) {
-                    // ignore
+                    
                 }
-                state.setConnection(con); // 设置连接
-                state.setStateLogger(logger); // 设置日志记录器
-                state.setManager(manager); // 设置查询管理器
+                state.setConnection(con); 
+                state.setStateLogger(logger); 
+                state.setManager(manager); 
                 if (options.logEachSelect()) {
                     logger.writeCurrent(state.getState());
                 }
                 Reproducer<G> reproducer = null;
-                if (options.enableQPG()) { // 默认没用，不用管了
+                if (options.enableQPG()) { 
                     provider.generateAndTestDatabaseWithQueryPlanGuidance(state);
                 } else {
                     reproducer = provider.generateAndTestDatabase(state);
-                    // 这里首先进行的是填充数据库，然后进行测试
+                    
                 }
                 try {
                     logger.getCurrentFileWriter().close();
@@ -491,7 +473,7 @@ public final class Main {
                     QueryManager<C> newManager = new QueryManager<>(newGlobalState);
                     newGlobalState.setStateLogger(new StateLogger(databaseName, provider, options));
                     newGlobalState.setManager(newManager);
-                    // 以上是新state的初始化
+                    
 
                     Reducer<G> reducer = new StatementReducer<>(provider);
                     reducer.reduce(state, reproducer, newGlobalState);
@@ -527,8 +509,8 @@ public final class Main {
             return state;
         }
 
-        // 新来塞北，传到真消息，赤地居民无一粒，更五单于争立
-        // 维师尚父鹰扬，熊罴百万堂堂，收取黄金假钺，归来异姓真王
+        
+        
         public StateLogger getLogger() {
             return logger;
         }
@@ -564,7 +546,7 @@ public final class Main {
 
         @SuppressWarnings("unchecked")
         public DBMSExecutor<G, O, C> getDBMSExecutor(String databaseName, Randomly r) {
-            // 检查 ： databaseName 永久修改成了 TPCD
+            
             try {
                 return new DBMSExecutor<G, O, C>(provider.getClass().getDeclaredConstructor().newInstance(), options,
                         command, "tpcd", r);
@@ -580,8 +562,8 @@ public final class Main {
     }
 
     public static int executeMain(String... args) throws AssertionError {
-        List<DatabaseProvider<?, ?, ?>> providers = getDBMSProviders(); // 通过serviceLoad得到
-        Map<String, DBMSExecutorFactory<?, ?, ?>> nameToProvider = new HashMap<>(); // 存储对应名称和工厂
+        List<DatabaseProvider<?, ?, ?>> providers = getDBMSProviders(); 
+        Map<String, DBMSExecutorFactory<?, ?, ?>> nameToProvider = new HashMap<>(); 
         MainOptions options = new MainOptions();
         Builder commandBuilder = JCommander.newBuilder().addObject(options);
         for (DatabaseProvider<?, ?, ?> provider : providers) {
@@ -590,8 +572,8 @@ public final class Main {
             commandBuilder = commandBuilder.addCommand(name, executorFactory.getCommand());
             nameToProvider.put(name, executorFactory);
         }
-        // 其实只有一个mysql的provider
-        JCommander jc = commandBuilder.programName("SQLancer").build(); // JCommander用来处理命令行参数
+        
+        JCommander jc = commandBuilder.programName("SQLancer").build(); 
         jc.parse(args);
 
         if (jc.getParsedCommand() == null || options.isHelp()) {
@@ -599,10 +581,10 @@ public final class Main {
             return options.getErrorExitCode();
         }
 
-        Randomly.initialize(options); // 初始化options
-        // ⬇ 这段代码主要在程序即将关闭时输出一些执行统计信息
+        Randomly.initialize(options); 
+        
         if (options.printProgressInformation()) {
-            startProgressMonitor(); // 开始监测,不管
+            startProgressMonitor(); 
             if (options.printProgressSummary()) {
                 Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
@@ -630,15 +612,15 @@ public final class Main {
         }
 
         ExecutorService execService = Executors.newFixedThreadPool(options.getNumberConcurrentThreads());
-        // 创建一个固定大小的线程池 : 线程池大小设定来自命令行 , 默认16,参数设置为4
+        
         DBMSExecutorFactory<?, ?, ?> executorFactory = nameToProvider.get(jc.getParsedCommand());
-        // 根据名称获取相应工厂 , jc.getParsedCommand()返回的是数据库名字MySQL
+        
         if (options.performConnectionTest()) {
-            // 对数据库连接进行测试,同时建立新数据库
+            
             try {
                 executorFactory.getDBMSExecutor(options.getDatabasePrefix() + "connectiontest", new Randomly())
                         .testConnection();
-                // 这里除了测试连接,还通过createDatabase()建立了新的数据库,我需要修改的亦在此处
+                
             } catch (Exception e) {
                 System.err.println(
                         "SQLancer failed creating a test database, indicating that SQLancer might have failed connecting to the DBMS. In order to change the username, password, host and port, you can use the --username, --password, --host and --port options.\n\n");
@@ -650,10 +632,10 @@ public final class Main {
 
         for (int i = 0; i < 5; i++) {
             System.out.println("------hxj-----");
-            // 这个数值是,查询到多少bug就停止测试,默认100 options.getTotalNumberTries()
-            // final String databaseName = options.getDatabasePrefix() + i;
+            
+            
             final String databaseName = "tpcd";
-            // 新bug有新db,也是线程名 , 前面是“database” 后面是执行次数,如果没有新bug,就不会增加i的数值
+            
             final long seed;
             if (options.getRandomSeed() == -1) {
                 seed = System.currentTimeMillis() + i;
@@ -662,23 +644,21 @@ public final class Main {
             }
             execService.execute(new Runnable() {
                 @Override
-                public void run() { // 在这里执行线程
-                    Thread.currentThread().setName(databaseName); // 以当前DBname命名这个线程
-                    System.out.println("执行线程" + databaseName);
-                    runThread(databaseName); // 跑这个线程,具体实现在下面
+                public void run() { 
+                    Thread.currentThread().setName(databaseName); 
+                    runThread(databaseName);
                 }
 
                 private void runThread(final String databaseName) {
-                    System.out.println("开始执行线程" + databaseName);
                     Randomly r = new Randomly(seed);
                     try {
                         int maxNrDbs = options.getMaxGeneratedDatabases();
-                        // 默认-1 一直跑下去
+                        
                         for (int i = 0; i < maxNrDbs || maxNrDbs == -1; i++) {
                             Boolean continueRunning = run(options, execService, executorFactory, r, databaseName);
-                            // 这个run在下面实现
+                            
                             if (!continueRunning) {
-                                // 直到 continueRunning 成为 False
+                                
                                 someOneFails.set(true);
                                 break;
                             }
@@ -694,9 +674,9 @@ public final class Main {
                 private boolean run(MainOptions options, ExecutorService execService,
                         DBMSExecutorFactory<?, ?, ?> executorFactory, Randomly r, final String databaseName) {
                     DBMSExecutor<?, ?, ?> executor = executorFactory.getDBMSExecutor(databaseName, r);
-                    // 获取执行类
+                    
                     try {
-                        executor.run(); // 执行类的 run：这里是核心测试流程
+                        executor.run(); 
                         return true;
                     } catch (IgnoreMeException e) {
                         return true;
@@ -734,14 +714,7 @@ public final class Main {
         return someOneFails.get() ? options.getErrorExitCode() : 0;
     }
 
-    /**
-     * To register a new provider, it is necessary to implement the DatabaseProvider interface and add an additional
-     * configuration file, see https://docs.oracle.com/javase/9/docs/api/java/util/ServiceLoader.html. Currently, we use
-     * an @AutoService annotation to create the configuration file automatically. This allows SQLancer to pick up
-     * providers in other JARs on the classpath.
-     *
-     * @return The list of service providers on the classpath
-     */
+    
     static List<DatabaseProvider<?, ?, ?>> getDBMSProviders() {
         List<DatabaseProvider<?, ?, ?>> providers = new ArrayList<>();
         @SuppressWarnings("rawtypes")
@@ -753,42 +726,19 @@ public final class Main {
         return providers;
     }
 
-    // see https://github.com/sqlancer/sqlancer/issues/799
+    
     private static void checkForIssue799(List<DatabaseProvider<?, ?, ?>> providers) {
         if (providers.isEmpty()) {
-            System.err.println(
-                    "No DBMS implementations (i.e., instantiations of the DatabaseProvider class) were found. You likely ran into an issue described in https://github.com/sqlancer/sqlancer/issues/799. As a workaround, I now statically load all supported providers as of June 7, 2023.");
-            providers.add(new CitusProvider());
-            providers.add(new ClickHouseProvider());
-            providers.add(new CnosDBProvider());
-            providers.add(new CockroachDBProvider());
-            providers.add(new DatabendProvider());
-            providers.add(new DorisProvider());
-            providers.add(new DuckDBProvider());
-            providers.add(new H2Provider());
-            providers.add(new HSQLDBProvider());
             providers.add(new MariaDBProvider());
-            providers.add(new MaterializeProvider());
             providers.add(new MySQLProvider());
             providers.add(new OceanBaseProvider());
-            providers.add(new PrestoProvider());
-            providers.add(new PostgresProvider());
-            providers.add(new QuestDBProvider());
-            providers.add(new SQLite3Provider());
-            providers.add(new StoneDBProvider());
             providers.add(new TiDBProvider());
-            providers.add(new TimescaleDBProvider());
-            providers.add(new YCQLProvider());
-            providers.add(new YSQLProvider());
         }
     }
 
     private static synchronized void startProgressMonitor() {
         if (progressMonitorStarted) {
-            /*
-             * it might be already started if, for example, the main method is called multiple times in a test (see
-             * https://github.com/sqlancer/sqlancer/issues/90).
-             */
+            
             return;
         } else {
             progressMonitorStarted = true;

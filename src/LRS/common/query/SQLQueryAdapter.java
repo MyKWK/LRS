@@ -45,19 +45,18 @@ public class SQLQueryAdapter extends Query<SQLConnection> {
         checkQueryString();
     }
 
-    // 规范 sql
     private String canonicalizeString(String s) {
         if (s.endsWith(";")) {
             return s;
         } else if (!s.contains("--")) {
             return s + ";";
         } else {
-            // query contains a comment
+            
             return s;
         }
     }
 
-    // 不用管
+    
     private void checkQueryString() {
         if (!couldAffectSchema && guessAffectSchemaFromQuery(query)) {
             throw new AssertionError("CREATE TABLE statements should set couldAffectSchema to true");
@@ -128,10 +127,10 @@ public class SQLQueryAdapter extends Query<SQLConnection> {
     public <G extends GlobalState<?, ?, SQLConnection>> SQLancerResultSet executeAndGet
             (G globalState, String... fills) throws SQLException
     {
-        Statement s; //用来存储原始state
+        Statement s; 
         if (fills.length > 0) {
             s = globalState.getConnection().prepareStatement(fills[0]);
-            for (int i = 1; i < fills.length; i++) { // 没用，只有一个 query
+            for (int i = 1; i < fills.length; i++) { 
                 ((PreparedStatement) s).setString(i, fills[i]);
             }
         } else {
@@ -141,11 +140,11 @@ public class SQLQueryAdapter extends Query<SQLConnection> {
         try {
             if (s instanceof PreparedStatement) {
                 PreparedStatement ps = (PreparedStatement) s;
-                ps.setQueryTimeout(15); // 设置查询超时为15秒
+                ps.setQueryTimeout(15); 
                 result = ps.executeQuery();
             } else {
-                s.setQueryTimeout(15); // 对 Statement 设置超时（不适用于所有数据库）
-                result = s.executeQuery(query); // 只执行这里
+                s.setQueryTimeout(15); 
+                result = s.executeQuery(query); 
             }
             Main.nrSuccessfulActions.addAndGet(1);
             if (result == null) {
@@ -153,7 +152,7 @@ public class SQLQueryAdapter extends Query<SQLConnection> {
             }
             return new SQLancerResultSet(result);
         } catch (SQLTimeoutException e) {
-            // 捕捉查询超时异常
+            
             throw new RuntimeException("Query timed out after 15 seconds", e);
         }catch (Exception e) {
             s.close();

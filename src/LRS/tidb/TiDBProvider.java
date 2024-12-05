@@ -177,7 +177,6 @@ public class TiDBProvider extends SQLProviderAdapter<TiDBGlobalState, TiDBOption
         String password = globalState.getOptions().getPassword();
         String host = globalState.getOptions().getHost();
         int port = globalState.getOptions().getPort();
-        // 以上在参数中填写,实现连接
         if (host == null) {
             host = TiDBOptions.DEFAULT_HOST;
         }

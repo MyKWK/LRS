@@ -34,7 +34,7 @@ public final class ComparatorHelper {
         if (a == b) {
             return true;
         }
-        // If the difference is less than epsilon, treat as equal.
+        
         return Math.abs(a - b) < 0.001 * Math.max(Math.abs(a), Math.abs(b)) + 0.001;
     }
 
@@ -44,12 +44,12 @@ public final class ComparatorHelper {
             SQLGlobalState<?, ?> state) throws SQLException
     {
         if (state.getOptions().logEachSelect()) {
-            // TODO: refactor me
+            
             state.getLogger().writeCurrent(queryString);
             try {
                 state.getLogger().getCurrentFileWriter().flush();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                
                 e.printStackTrace();
             }
         }
@@ -65,8 +65,8 @@ public final class ComparatorHelper {
             while (result.next()) {
                 String resultTemp = result.getString(1);
                 if (resultTemp != null) {
-                    resultTemp = resultTemp.replaceAll("[\\.]0+$", ""); // Remove the trailing zeros as many DBMS treat
-                    // it as non-bugs
+                    resultTemp = resultTemp.replaceAll("[\\.]0+$", ""); 
+                    
                 }
                 resultSet.add(resultTemp);
             }
@@ -95,26 +95,25 @@ public final class ComparatorHelper {
             ExpectedErrors errors,
             SQLGlobalState<?, ?> state) throws Exception
     {
-        // 日记
         if (state.getOptions().logEachSelect()) {
-            // TODO: refactor me
+            
             state.getLogger().writeCurrent(queryString);
             try {
                 state.getLogger().getCurrentFileWriter().flush();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                
                 e.printStackTrace();
             }
         }
-        // 确定是否规范化
+        
         boolean canonicalizeString = state.getOptions().canonicalizeSqlString();
         SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors, true, canonicalizeString);
-//        List<String> resultSet = new ArrayList<>();
+
         SQLancerResultSet result = null;
         ResultSet ResultSet = null;
         try {
 
-            result = q.executeAndGet(state); //获取的是原始结果，但进行了SQLancerResultSet化
+            result = q.executeAndGet(state); 
             ResultSet = result.rs;
             return resultSetToList(ResultSet);
         } catch (Exception e) {
@@ -168,7 +167,7 @@ public final class ComparatorHelper {
             String firstQueryString = String.format(queryFormatString, originalQueryString, firstResultSetMisses);
             String secondQueryString = String.format(queryFormatString, String.join(";", combinedString),
                     secondResultSetMisses);
-            // update the SELECT queries to be logged at the bottom of the error log file
+            
             state.getState().getLocalState()
                     .log(String.format("%s" + System.lineSeparator() + "%s", firstQueryString, secondQueryString));
             String assertionMessage = String.format("The content of the result sets mismatch!" + System.lineSeparator()
@@ -181,8 +180,8 @@ public final class ComparatorHelper {
     public static void assumeResultSetsAreEqual(List<String> resultSet, List<String> secondResultSet,
             String originalQueryString, List<String> combinedString, SQLGlobalState<?, ?> state,
             UnaryOperator<String> canonicalizationRule) {
-        // Overloaded version of assumeResultSetsAreEqual that takes a canonicalization function which is applied to
-        // both result sets before their comparison.
+        
+        
         List<String> canonicalizedResultSet = resultSet.stream().map(canonicalizationRule).collect(Collectors.toList());
         List<String> canonicalizedSecondResultSet = secondResultSet.stream().map(canonicalizationRule)
                 .collect(Collectors.toList());

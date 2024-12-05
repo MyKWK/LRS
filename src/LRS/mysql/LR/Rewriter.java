@@ -6,9 +6,9 @@ import org.apache.calcite.config.Lex;
 import org.apache.calcite.plan.*;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
-// **** 规则添加
+
 import org.apache.calcite.rel.core.*;
-// *** 规则结束
+
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalCalc;
 import org.apache.calcite.rel.logical.LogicalSort;
@@ -38,7 +38,7 @@ import static org.apache.calcite.avatica.util.Casing.UNCHANGED;
 import static org.apache.calcite.avatica.util.Quoting.DOUBLE_QUOTE;
 
 public class Rewriter {
-    // public DBConn db;
+    
     public ArrayList tableList;
     public Vector<Pair<String, Vector<Pair<String, String>>>> schema;
     Planner planner;
@@ -87,7 +87,7 @@ public class Rewriter {
                 + getCostFromRelNode(rel_node).getIo() * 4;
     }
 
-    // remove useless nodes before verify
+    
     public RelNode removeOrderbyNCalc(RelNode rel_node, RelNode parent, int childIndex) {
         for (int i = 0; i < rel_node.getInputs().size(); i++) {
             removeOrderbyNCalc(rel_node.getInput(i), rel_node, i);
@@ -102,7 +102,7 @@ public class Rewriter {
         return rel_node;
     }
 
-    // remove useless aggregate
+    
     public RelNode rel_formatting(RelNode rel_node) {
         Deque stack = new LinkedList();
         stack.add(rel_node);
@@ -133,9 +133,9 @@ public class Rewriter {
         return rel_node;
     }
 
-    // String sql to RelNode
+    
     public RelNode SQL2RA(String sql) throws SqlParseException, ValidationException, RelConversionException {
-        // 将sql转化为RelNode
+        
         this.planner.close();
         this.planner.reset();
 
@@ -150,10 +150,10 @@ public class Rewriter {
         return rel_node;
     }
 
-    // 使用RBO进行优化,因此使用HepPlanner
+    
     public List singleRewrite(RelNode relNode, String rule) {
-        this.optimizer.updateRule(rule); // 这里会打印规则实例
-        List res = this.optimizer.findBest(relNode); // 核心方法
+        this.optimizer.updateRule(rule); 
+        List res = this.optimizer.findBest(relNode); 
         res.add(1);
         return res;
     }

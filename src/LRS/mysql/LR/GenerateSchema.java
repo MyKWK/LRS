@@ -23,7 +23,6 @@ public class GenerateSchema {
                     JSONObject subJson = columnsJsonArray.getJSONObject(j);
                     String type = subJson.get("type").toString();
 
-                    // 防止类型获取失败
                     if (SqlTypeName.get(type.toUpperCase()) == null) {
                         if (type.equalsIgnoreCase("character varying")) {
                             type = "varchar";
@@ -38,8 +37,6 @@ public class GenerateSchema {
                         } else if (type.toLowerCase().contains("decimal")) {
                             type = "decimal";
                         } else {
-                            System.out.println(
-                                    "类型转换失败，临时转成varchar, 字段为:" + subJson.get("name").toString() + "，类型为:" + type);
                             type = "varchar";
                         }
                     }

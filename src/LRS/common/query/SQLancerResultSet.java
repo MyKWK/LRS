@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class SQLancerResultSet implements Closeable {
 
-    public ResultSet rs; // 我修改了权限：public
+    public ResultSet rs;
     private Runnable runnableEpilogue;
 
     public SQLancerResultSet(ResultSet rs) {

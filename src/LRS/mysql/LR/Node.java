@@ -21,7 +21,7 @@ public class Node {
     float gamma;
     int selected = 0;
     Map activatedRules = new HashMap();
-    String name = ""; // the rule's name
+    String name = ""; 
     private static Map<String, Integer> usageCountMap = new HashMap<>();
 
     public Node(String sql, RelNode state_rel, float origin_cost, Rewriter rewriter, float gamma, Node parent,
@@ -143,7 +143,7 @@ public class Node {
         int i = random.nextInt(bestchildren.size());
         return bestchildren.get(i);
     }
-    // d1
+    
     private float calculateTreeEditDistance(String Q, String QPrime) throws SqlParseException {
         SqlNode ast1 = this.rewriter.planner.parse(new SourceStringReader(Q));
         SqlNode ast2 = this.rewriter.planner.parse(new SourceStringReader(QPrime));
@@ -198,7 +198,7 @@ public class Node {
         }
         return children;
     }
-    // d2
+    
     private float calculateOperatorMutation(String Q, String QPrime) throws SqlParseException {
         SqlNode ast1 = this.rewriter.planner.parse(new SourceStringReader(Q));
         SqlNode ast2 = this.rewriter.planner.parse(new SourceStringReader(QPrime));
@@ -226,7 +226,7 @@ public class Node {
         }
 
         if (node instanceof SqlCall) {
-            // 对于调用操作符的节点（如 JOIN）
+            
             SqlCall sqlCall = (SqlCall) node;
             String operator = sqlCall.getOperator().getName();
             if ("JOIN".equals(operator)) {
@@ -234,7 +234,7 @@ public class Node {
             }
         }
 
-        // 对于其他节点，如 SqlIdentifier, SqlLiteral，可能不包含操作符，直接跳过
+        
         if (node instanceof SqlLiteral || node instanceof SqlIdentifier) {
             return operators;
         }
@@ -265,9 +265,9 @@ public class Node {
         }
 
         float similarity = (float) intersection.size() / union.size();
-        return 1 - similarity;  // d2(vi, v0) = 1 - Jaccard 相似度
+        return 1 - similarity;  
     }
-    // d3
+    
     public float calculateDataCoverage(String QPrime) throws SqlParseException {
         SqlNode astQPrime = this.rewriter.planner.parse(new SourceStringReader(QPrime));
         Set<String> newSegments = extractNewSegments(astQPrime);
@@ -307,7 +307,7 @@ public class Node {
     private static float calculateCoverageWeight(String segment) {
         return 1.0f;
     }
-    // d4
+    
     public static float calculateHistoricalRuleUsage(String rule) {
         int ruleUsageCount = UsageCount(rule);
         int maxUsageCount = getMaxUsageCount();
