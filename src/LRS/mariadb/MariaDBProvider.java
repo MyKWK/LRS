@@ -37,16 +37,16 @@ public class MariaDBProvider extends SQLProviderAdapter<MariaDBGlobalState, Mari
     }
 
     enum Action {
-        ANALYZE_TABLE, //
-        CHECKSUM, //
-        CHECK_TABLE, //
-        CREATE_INDEX, //
-        INSERT, //
-        OPTIMIZE, //
-        REPAIR_TABLE, //
-        SET, //
-        TRUNCATE, //
-        UPDATE, //
+        ANALYZE_TABLE, 
+        CHECKSUM, 
+        CHECK_TABLE, 
+        CREATE_INDEX, 
+        INSERT, 
+        OPTIMIZE, 
+        REPAIR_TABLE, 
+        SET, 
+        TRUNCATE, 
+        UPDATE, 
     }
 
     @Override
@@ -179,15 +179,14 @@ public class MariaDBProvider extends SQLProviderAdapter<MariaDBGlobalState, Mari
             port = MariaDBOptions.DEFAULT_PORT;
         }
         String databaseName = "tpcd";
-        String url = String.format("jdbc:mariadb://%s:%d?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true",
-                host, port);
+        String url = String.format("jdbc:mariadb://%s:%d", host, port);
         Connection con = DriverManager.getConnection(url, username, password);
         try (Statement s = con.createStatement()) {
-            // 使用指定的数据库
+            
             s.execute("USE " + databaseName);
         }
 
-        // 返回 SQLConnection 对象
+        
         return new SQLConnection(con);
     }
 

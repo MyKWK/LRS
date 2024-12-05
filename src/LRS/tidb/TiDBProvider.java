@@ -140,7 +140,7 @@ public class TiDBProvider extends SQLProviderAdapter<TiDBGlobalState, TiDBOption
         }
 
         if (globalState.getDbmsSpecificOptions().getTestOracleFactory().stream()
-                .anyMatch((o) -> o == TiDBOracleFactory.CERT)) {
+                .anyMatch((o) -> o == TiDBOracleFactory.LRS)) {
             // Disable strict Group By constraints for ROW oracle
             globalState.executeStatement(new SQLQueryAdapter(
                     "SET @@sql_mode='STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';"));

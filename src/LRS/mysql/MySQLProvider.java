@@ -43,25 +43,25 @@ public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOpt
 
     public MySQLProvider() {
         super(MySQLGlobalState.class, MySQLOptions.class);
-    } // 这里调用父类的构造方法
+    } 
 
     enum Action implements AbstractAction<MySQLGlobalState> {
-        SHOW_TABLES((g) -> new SQLQueryAdapter("SHOW TABLES")), //
-        INSERT(MySQLInsertGenerator::insertRow), //
-        SET_VARIABLE(MySQLSetGenerator::set), //
-        REPAIR(MySQLRepair::repair), //
-        OPTIMIZE(MySQLOptimize::optimize), //
-        CHECKSUM(MySQLChecksum::checksum), //
-        CHECK_TABLE(MySQLCheckTable::check), //
-        ANALYZE_TABLE(MySQLAnalyzeTable::analyze), //
-        FLUSH(MySQLFlush::create), RESET(MySQLReset::create), CREATE_INDEX(MySQLIndexGenerator::create), //
-        ALTER_TABLE(MySQLAlterTable::create), //
-        TRUNCATE_TABLE(MySQLTruncateTableGenerator::generate), //
+        SHOW_TABLES((g) -> new SQLQueryAdapter("SHOW TABLES")), 
+        INSERT(MySQLInsertGenerator::insertRow), 
+        SET_VARIABLE(MySQLSetGenerator::set), 
+        REPAIR(MySQLRepair::repair), 
+        OPTIMIZE(MySQLOptimize::optimize), 
+        CHECKSUM(MySQLChecksum::checksum), 
+        CHECK_TABLE(MySQLCheckTable::check), 
+        ANALYZE_TABLE(MySQLAnalyzeTable::analyze), 
+        FLUSH(MySQLFlush::create), RESET(MySQLReset::create), CREATE_INDEX(MySQLIndexGenerator::create), 
+        ALTER_TABLE(MySQLAlterTable::create), 
+        TRUNCATE_TABLE(MySQLTruncateTableGenerator::generate), 
         SELECT_INFO((g) -> new SQLQueryAdapter(
                 "select TABLE_NAME, ENGINE from information_schema.TABLES where table_schema = '" + g.getDatabaseName()
-                        + "'")), //
-        UPDATE(MySQLUpdateGenerator::create), //
-        DELETE(MySQLDeleteGenerator::delete), //
+                        + "'")), 
+        UPDATE(MySQLUpdateGenerator::create), 
+        DELETE(MySQLDeleteGenerator::delete), 
         DROP_INDEX(MySQLDropIndex::generate);
 
         private final SQLQueryProvider<MySQLGlobalState> sqlQueryProvider;
@@ -102,11 +102,11 @@ public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOpt
             nrPerformed = Randomly.getBooleanWithSmallProbability() ? r.getInteger(0, 1) : 0;
             break;
         case OPTIMIZE:
-            // seems to yield low CPU utilization
+            
             nrPerformed = Randomly.getBooleanWithSmallProbability() ? r.getInteger(0, 1) : 0;
             break;
         case RESET:
-            // affects the global state, so do not execute
+            
             nrPerformed = globalState.getOptions().getNumberConcurrentThreads() == 1 ? r.getInteger(0, 1) : 0;
             break;
         case CHECKSUM:
@@ -137,15 +137,15 @@ public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOpt
 
     @Override
     public void generateDatabase(MySQLGlobalState globalState) throws Exception {
-        // 这个方法的作用是为数据库填充数据表,必须让它失效
-        // System.out.println("Table_Nr : "+globalState.getSchema().getDatabaseTables().size());
+        
+        
 
         while (globalState.getSchema().getDatabaseTables().size() < Randomly.getNotCachedInteger(1, 2)) {
             String tableName = DBMSCommon.createTableName(globalState.getSchema().getDatabaseTables().size());
             SQLQueryAdapter createTable = MySQLTableGenerator.generate(globalState, tableName);
             globalState.executeStatement(createTable);
         }
-        // System.out.println("Table Num : "+globalState.getSchema().getDatabaseTables().size());//检查：这里检查表数量是否足够
+        
         StatementExecutor<MySQLGlobalState, Action> se = new StatementExecutor<>(globalState, Action.values(),
                 MySQLProvider::mapActions, (q) -> {
                     if (globalState.getSchema().getDatabaseTables().isEmpty()) {
@@ -155,8 +155,8 @@ public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOpt
         se.executeStatements();
 
         if (globalState.getDbmsSpecificOptions().getTestOracleFactory().stream()
-                .anyMatch((o) -> o == MySQLOracleFactory.CERT)) {
-            // Enfore statistic collected for all tables
+                .anyMatch((o) -> o == MySQLOracleFactory.LRS)) {
+            
             ExpectedErrors errors = new ExpectedErrors();
             MySQLErrors.addExpressionErrors(errors);
             for (MySQLTable table : globalState.getSchema().getDatabaseTables()) {
@@ -174,12 +174,12 @@ public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOpt
 
     @Override
     public SQLConnection createDatabase(MySQLGlobalState globalState) throws SQLException {
-        // 新建数据库，不添加数据，这里被替换为 TPCD 数据库，已经填充完成数据
+        
         String username = globalState.getOptions().getUserName();
         String password = globalState.getOptions().getPassword();
         String host = globalState.getOptions().getHost();
         int port = globalState.getOptions().getPort();
-        // 以上在参数中填写,实现连接
+        
         if (host == null) {
             host = MySQLOptions.DEFAULT_HOST;
         }
@@ -188,8 +188,7 @@ public class MySQLProvider extends SQLProviderAdapter<MySQLGlobalState, MySQLOpt
         }
         String databaseName = "tpcd";
         globalState.getState().logStatement("USE " + databaseName);
-        String url = String.format("jdbc:mysql://%s:%d?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true",
-                host, port);
+        String url = String.format("jdbc:mariadb://%s:%d", host, port);
         Connection con = DriverManager.getConnection(url, username, password);
         try (Statement s = con.createStatement()) {
             s.execute("USE " + databaseName);
