@@ -8,12 +8,17 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="sqlancer" />
+        <module name="DBtest" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="sqlancer" target="11" />
+    </bytecodeTargetLevel>
   </component>
   <component name="EclipseCompilerSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="sqlancer" options="-properties /Users/shenqi/Desktop/DBtest/DBFinal_without_hint_副本/.settings/org.eclipse.jdt.core.prefs" />
+      <module name="DBtest" options="-properties /Users/shenqi/Desktop/LRS/.settings/org.eclipse.jdt.core.prefs" />
+      <module name="sqlancer" options="" />
     </option>
   </component>
 </project>
