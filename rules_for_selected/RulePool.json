@@ -1,0 +1,52 @@
+[
+  {
+    "rule": "AGGREGATE_EXPAND_DISTINCT_AGGREGATES",
+    "description": "Expands DISTINCT aggregates, such as transforming COUNT(DISTINCT x) into more fundamental operations like GROUP BY x and COUNT(*), or using JOIN to achieve deduplication.",
+    "purpose": "To leverage more general optimization strategies, as some database systems may lack sufficient optimization for DISTINCT aggregates."
+  },
+  {
+    "rule": "AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN",
+    "description": "Expands DISTINCT aggregates into JOIN operations, specifically detailing one implementation of AGGREGATE_EXPAND_DISTINCT_AGGREGATES.",
+    "purpose": "To take advantage of JOIN optimization features, especially when joining with other tables, as JOIN might be more efficient."
+  },
+  {
+    "rule": "AGGREGATE_JOIN_TRANSPOSE_EXTENDED",
+    "description": "Extended transposition of aggregate and JOIN operators, swapping the order of AGGREGATE and JOIN while handling more complex cases, such as considering JOIN conditions and aggregation grouping fields.",
+    "purpose": "The goal is often to push FILTER and PROJECT as far down as possible before JOIN to reduce the amount of data being joined. 'EXTENDED' indicates handling more complex scenarios involving multiple JOINs and nested AGGREGATEs."
+  },
+  {
+    "rule": "AGGREGATE_PROJECT_MERGE",
+    "description": "Merges aggregate and projection (PROJECT) operators. If PROJECT immediately follows AGGREGATE and only selects aggregation result columns, the two are merged.",
+    "purpose": "To reduce the number of operators, simplify the query plan, and improve execution efficiency."
+  },
+  {
+    "rule": "AGGREGATE_ANY_PULL_UP_CONSTANTS",
+    "description": "Pulls up constant expressions in aggregate operators. If the aggregation expression contains constants, they are extracted out of the AGGREGATE operator. 'ANY' may refer to specific aggregation functions or general rules.",
+    "purpose": "To facilitate constant folding or enable other upper-level optimization rules, or to address insufficient optimization for aggregate expressions containing constants in some databases."
+  },
+  {
+    "rule": "AGGREGATE_UNION_AGGREGATE",
+    "description": "Merges aggregate operators above UNION. If the UNION result is consumed by an aggregate operator and meets merge conditions (e.g., mergeable aggregate functions), the two aggregate operators are merged.",
+    "purpose": "To reduce the number of aggregations and improve efficiency. For example, SELECT SUM(col) FROM (SELECT ... UNION ALL SELECT ...) t can be optimized into a single aggregation over the UNION source data."
+  },
+  {
+    "rule": "AGGREGATE_UNION_TRANSPOSE",
+    "description": "Transposes aggregate and UNION operators, swapping the order of AGGREGATE and UNION.",
+    "purpose": "To push aggregation into UNION branches or vice versa, depending on the query and optimization goals. For example, pushing aggregation down can exploit parallelism within UNION branches or reduce data volume after UNION."
+  },
+  {
+    "rule": "AGGREGATE_VALUES",
+    "description": "Optimizes aggregate operators acting on VALUES operators. Special optimizations are applied when the input is a VALUES operator (literal values operator).",
+    "purpose": "VALUES operators typically involve small datasets, allowing the aggregate results to be computed during the optimization phase, avoiding runtime aggregation."
+  },
+  {
+    "rule": "AGGREGATE_INSTANCE",
+    "description": "Instance-specific optimization of aggregate operators, applying special optimizations for specific aggregate operator instances.",
+    "purpose": "To improve execution efficiency in specific scenarios, such as when the aggregation is a no-op or can be simplified."
+  },
+  {
+    "rule": "FILTER_AGGREGATE_TRANSPOSE",
+    "description": "Transposes filter and aggregate operators, swapping the order of FILTER and AGGREGATE.",
+    "purpose": "Typically, FILTER is pushed down before AGGREGATE to filter data first, reducing the volume of data being aggregated. However, if the filter condition depends on aggregation results, transposition cannot be directly applied."
+  }
+]
