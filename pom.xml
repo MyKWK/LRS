@@ -333,6 +333,16 @@
       <version>0.4.0</version>
     </dependency>
     <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-chroma</artifactId>
+      <version>0.23.0</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.langchain4j</groupId>
+      <artifactId>langchain4j-embeddings</artifactId>
+      <version>0.23.0</version>
+    </dependency>
+    <dependency>
       <groupId>com.facebook.presto</groupId>
       <artifactId>presto-jdbc</artifactId>
       <version>0.283</version>

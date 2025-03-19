@@ -1,285 +1,342 @@
 [
   {
+    "id": "R001",
     "rule": "AGGREGATE_EXPAND_DISTINCT_AGGREGATES",
     "description": "Expands DISTINCT aggregates, such as transforming COUNT(DISTINCT x) into more fundamental operations like GROUP BY x and COUNT(*), or using JOIN to achieve deduplication.",
     "purpose": "To leverage more general optimization strategies, as some database systems may lack sufficient optimization for DISTINCT aggregates."
   },
   {
+    "id": "R002",
     "rule": "AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN",
     "description": "Expands DISTINCT aggregates into JOIN operations, specifically detailing one implementation of AGGREGATE_EXPAND_DISTINCT_AGGREGATES.",
     "purpose": "To take advantage of JOIN optimization features, especially when joining with other tables, as JOIN might be more efficient."
   },
   {
+    "id": "R003",
     "rule": "AGGREGATE_JOIN_TRANSPOSE_EXTENDED",
     "description": "Extended transposition of aggregate and JOIN operators, swapping the order of AGGREGATE and JOIN while handling more complex cases, such as considering JOIN conditions and aggregation grouping fields.",
     "purpose": "The goal is often to push FILTER and PROJECT as far down as possible before JOIN to reduce the amount of data being joined. 'EXTENDED' indicates handling more complex scenarios involving multiple JOINs and nested AGGREGATEs."
   },
   {
+    "id": "R004",
     "rule": "AGGREGATE_PROJECT_MERGE",
     "description": "Merges aggregate and projection (PROJECT) operators. If PROJECT immediately follows AGGREGATE and only selects aggregation result columns, the two are merged.",
     "purpose": "To reduce the number of operators, simplify the query plan, and improve execution efficiency."
   },
   {
+    "id": "R005",
     "rule": "AGGREGATE_ANY_PULL_UP_CONSTANTS",
     "description": "Pulls up constant expressions in aggregate operators. If the aggregation expression contains constants, they are extracted out of the AGGREGATE operator. 'ANY' may refer to specific aggregation functions or general rules.",
     "purpose": "To facilitate constant folding or enable other upper-level optimization rules, or to address insufficient optimization for aggregate expressions containing constants in some databases."
   },
   {
+    "id": "R006",
     "rule": "AGGREGATE_UNION_AGGREGATE",
     "description": "Merges aggregate operators above UNION. If the UNION result is consumed by an aggregate operator and meets merge conditions (e.g., mergeable aggregate functions), the two aggregate operators are merged.",
     "purpose": "To reduce the number of aggregations and improve efficiency. For example, SELECT SUM(col) FROM (SELECT ... UNION ALL SELECT ...) t can be optimized into a single aggregation over the UNION source data."
   },
   {
+    "id": "R007",
     "rule": "AGGREGATE_UNION_TRANSPOSE",
     "description": "Transposes aggregate and UNION operators, swapping the order of AGGREGATE and UNION.",
     "purpose": "To push aggregation into UNION branches or vice versa, depending on the query and optimization goals. For example, pushing aggregation down can exploit parallelism within UNION branches or reduce data volume after UNION."
   },
   {
+    "id": "R008",
     "rule": "AGGREGATE_VALUES",
     "description": "Optimizes aggregate operators acting on VALUES operators. Special optimizations are applied when the input is a VALUES operator (literal values operator).",
     "purpose": "VALUES operators typically involve small datasets, allowing the aggregate results to be computed during the optimization phase, avoiding runtime aggregation."
   },
   {
+    "id": "R009",
     "rule": "AGGREGATE_INSTANCE",
     "description": "Instance-specific optimization of aggregate operators, applying special optimizations for specific aggregate operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios, such as when the aggregation is a no-op or can be simplified."
   },
   {
+    "id": "R010",
     "rule": "FILTER_AGGREGATE_TRANSPOSE",
     "description": "Transposes filter and aggregate operators, swapping the order of FILTER and AGGREGATE.",
     "purpose": "Typically, FILTER is pushed down before AGGREGATE to filter data first, reducing the volume of data being aggregated. However, if the filter condition depends on aggregation results, transposition cannot be directly applied."
   },
   {
+    "id": "R011",
     "rule": "FILTER_CORRELATE",
     "description": "Optimizes filter operators with correlated subqueries, targeting filter conditions that include correlated subqueries. CORRELATE refers to such subqueries.",
     "purpose": "To convert inefficient correlated subqueries into more efficient equivalent forms, such as JOIN or decorrelation."
   },
   {
+    "id": "R012",
     "rule": "FILTER_INTO_JOIN",
     "description": "Transforms filter conditions into JOIN conditions. Certain filter conditions can be equivalently converted into JOIN ON conditions.",
     "purpose": "To utilize the optimizer and executor's higher efficiency in processing JOIN conditions."
   },
   {
+    "id": "R013",
     "rule": "JOIN_CONDITION_PUSH",
     "description": "Pushes filter conditions into JOIN ON conditions, merging them if the FILTER operator's conditions can apply to the JOIN ON condition.",
     "purpose": "To enhance the JOIN ON conditions, enabling earlier filtering during the JOIN to reduce intermediate results."
   },
   {
+    "id": "R014",
     "rule": "FILTER_MERGE",
     "description": "Merges adjacent filter operators. If two FILTER operators are adjacent, their filter conditions are combined into a single FILTER operator.",
     "purpose": "To reduce the number of operators and simplify the query plan."
   },
   {
+    "id": "R015",
     "rule": "FILTER_MULTI_JOIN_MERGE",
     "description": "Merges filter conditions in multi-table JOIN scenarios, combining related filter conditions for multiple FILTER and JOIN operators.",
     "purpose": "To improve filtering efficiency in complex multi-table JOIN scenarios."
   },
   {
+    "id": "R016",
     "rule": "FILTER_PROJECT_TRANSPOSE",
     "description": "Transposes filter and projection (PROJECT) operators, swapping the order of FILTER and PROJECT.",
     "purpose": "Typically, FILTER is pushed down before PROJECT to filter data first, reducing the volume of data being projected."
   },
   {
+    "id": "R017",
     "rule": "FILTER_SET_OP_TRANSPOSE",
     "description": "Transposes filter and set operation (SET_OP, such as UNION, INTERSECT, MINUS) operators, swapping the order of FILTER and SET_OP.",
     "purpose": "Typically, FILTER is pushed down before set operations to filter data first, reducing the volume of data being processed by set operations."
   },
   {
+    "id": "R018",
     "rule": "FILTER_TABLE_FUNCTION_TRANSPOSE",
     "description": "Transposes filter and table function (TABLE_FUNCTION) operators, swapping the order of FILTER and TABLE_FUNCTION. Table functions return tables.",
     "purpose": "Under certain conditions, filters can be moved after table functions, for instance, when filter conditions effectively reduce the output of table functions. Generally, FILTER is preferred to be pushed down before table functions to minimize the data processed by table functions."
   },
   {
+    "id": "R019",
     "rule": "FILTER_SCAN",
     "description": "Optimizes filter conditions on scan (SCAN) operators, applying filter conditions to SCAN operators (reading table data), possibly utilizing indexes or other scan optimization techniques.",
     "purpose": "To apply filter conditions as early as possible during data reading to minimize the volume of data read from storage."
   },
   {
+    "id": "R020",
     "rule": "FILTER_REDUCE_EXPRESSIONS",
     "description": "Simplifies filter operator expressions, simplifying filter condition expressions, such as constant folding, equivalence checking, etc.",
     "purpose": "To improve the efficiency of evaluating filter conditions and potentially identify always-true or always-false conditions for further optimization."
   },
   {
+    "id": "R021",
     "rule": "PROJECT_REDUCE_EXPRESSIONS",
     "description": "Simplifies projection operator expressions, similar to FILTER_REDUCE_EXPRESSIONS but for projection expressions.",
     "purpose": "To improve the efficiency of evaluating projection expressions."
   },
   {
+    "id": "R022",
     "rule": "FILTER_INSTANCE",
     "description": "Instance-specific optimization of filter operators, applying special optimizations for specific filter operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios, such as always-true/always-false filter conditions or replacing with more efficient operators."
   },
   {
+    "id": "R023",
     "rule": "JOIN_EXTRACT_FILTER",
     "description": "Extracts filter conditions from JOIN operators. If JOIN ON conditions contain parts that can be applied as independent FILTER conditions, they are extracted and applied as separate FILTER operators.",
     "purpose": "To separate complex JOIN conditions into simpler JOIN and FILTER conditions, facilitating subsequent optimizations such as pushing filters down."
   },
   {
+    "id": "R024",
     "rule": "JOIN_PROJECT_BOTH_TRANSPOSE",
     "description": "Transposes JOIN and projection operators, swapping the order of JOIN and PROJECT for both sides, where PROJECT selects columns from both sides of the JOIN.",
     "purpose": "To push PROJECT down before JOIN, selecting only the columns needed for the JOIN, thereby reducing the data volume being joined."
   },
   {
+    "id": "R025",
     "rule": "JOIN_PROJECT_LEFT_TRANSPOSE",
     "description": "Transposes JOIN and projection operators, swapping the order of JOIN and PROJECT for the left side, where PROJECT selects columns only from the left table of the JOIN.",
     "purpose": "To push PROJECT down before JOIN, selecting only the columns needed for the JOIN, thereby reducing the data volume being joined."
   },
   {
+    "id": "R026",
     "rule": "JOIN_PROJECT_RIGHT_TRANSPOSE",
     "description": "Transposes JOIN and projection operators, swapping the order of JOIN and PROJECT for the right side, where PROJECT selects columns only from the right table of the JOIN.",
     "purpose": "To push PROJECT down before JOIN, selecting only the columns needed for the JOIN, thereby reducing the data volume being joined."
   },
   {
+    "id": "R027",
     "rule": "JOIN_LEFT_UNION_TRANSPOSE",
     "description": "Transposes LEFT JOIN and UNION operators, swapping the order of LEFT JOIN and UNION.",
     "purpose": "To push JOIN down into UNION branches or push UNION down into JOIN inputs, depending on specific scenarios and optimization goals."
   },
   {
+    "id": "R028",
     "rule": "JOIN_RIGHT_UNION_TRANSPOSE",
     "description": "Transposes RIGHT JOIN and UNION operators, swapping the order of RIGHT JOIN and UNION.",
     "purpose": "To push JOIN down into UNION branches or push UNION down into JOIN inputs, depending on specific scenarios and optimization goals."
   },
   {
+    "id": "R029",
     "rule": "SEMI_JOIN_REMOVE",
     "description": "Removes SEMI JOIN operators. In certain cases, SEMI JOIN can be replaced with simpler operators (FILTER or EXISTS subqueries) and removed.",
     "purpose": "To simplify query plans and potentially improve execution efficiency, as some databases may not optimize SEMI JOIN sufficiently."
   },
   {
+    "id": "R030",
     "rule": "JOIN_REDUCE_EXPRESSIONS",
     "description": "Simplifies JOIN operator expressions, simplifying JOIN ON condition expressions, similar to FILTER_REDUCE_EXPRESSIONS.",
     "purpose": "To improve the efficiency of evaluating JOIN conditions."
   },
   {
+    "id": "R031",
     "rule": "JOIN_LEFT_INSTANCE",
     "description": "Instance-specific optimization of LEFT JOIN operators, applying special optimizations for specific LEFT JOIN operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."
   },
   {
+    "id": "R032",
     "rule": "JOIN_RIGHT_INSTANCE",
     "description": "Instance-specific optimization of RIGHT JOIN operators, applying special optimizations for specific RIGHT JOIN operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."
   },
   {
+    "id": "R033",
     "rule": "PROJECT_CALC_MERGE",
     "description": "Merges projection operators and calculation (CALC) operators. If PROJECT immediately follows CALC and their operations can be merged, the two are combined.",
     "purpose": "To reduce the number of operators, simplify the query plan, and improve execution efficiency. CALC and PROJECT boundaries can sometimes be blurred, and merging can better leverage operator execution characteristics."
   },
   {
+    "id": "R034",
     "rule": "PROJECT_CORRELATE_TRANSPOSE",
     "description": "Transposes projection operators and correlated subquery (CORRELATE) operators, swapping the order of PROJECT and CORRELATE.",
     "purpose": "To push projection into correlated subqueries or project correlated subquery results, depending on optimization goals. Correlated subquery optimizations are usually complex, and transposition may help transform them into more efficient forms."
   },
   {
+    "id": "R035",
     "rule": "PROJECT_MERGE",
     "description": "Merges adjacent projection operators. If two PROJECT operators are adjacent, their projection operations are combined into a single PROJECT operator.",
     "purpose": "To reduce the number of operators and simplify the query plan."
   },
   {
+    "id": "R036",
     "rule": "PROJECT_MULTI_JOIN_MERGE",
     "description": "Merges projection operations in multi-table JOIN scenarios, similar to FILTER_MULTI_JOIN_MERGE but for PROJECT operators in multi-table JOIN scenarios.",
     "purpose": "To improve projection efficiency in complex multi-table JOIN scenarios."
   },
   {
+    "id": "R037",
     "rule": "PROJECT_REMOVE",
     "description": "Removes redundant projection operators. If PROJECT simply selects all columns from the input without computation or column renaming, it can be removed.",
     "purpose": "To simplify the query plan and reduce unnecessary operator overhead."
   },
   {
+    "id": "R038",
     "rule": "PROJECT_TO_CALC",
     "description": "Converts projection operators into calculation (CALC) operators. In certain cases, PROJECT operators can be equivalently replaced with CALC operators, possibly for unified processing during later optimization or execution phases.",
     "purpose": "To unify operator representation, facilitating subsequent optimization and execution."
   },
   {
+    "id": "R039",
     "rule": "PROJECT_SUB_QUERY_TO_CORRELATE",
     "description": "Converts subqueries into correlated subqueries (CORRELATE). In certain cases, non-correlated subqueries can be converted into correlated subqueries, possibly to leverage certain optimization features of correlated subqueries or for unified processing with other correlated subqueries. However, optimizers typically aim to decorrelate.",
     "purpose": "To serve subsequent optimization processes by representing subqueries in a unified correlated subquery form for processing."
   },
   {
+    "id": "R040",
     "rule": "PROJECT_REDUCE_EXPRESSIONS",
     "description": "Simplifies projection operator expressions, similar to FILTER_REDUCE_EXPRESSIONS but for projection expressions.",
     "purpose": "To improve the efficiency of evaluating projection expressions."
   },
   {
+    "id": "R041",
     "rule": "PROJECT_INSTANCE",
     "description": "Instance-specific optimization of projection operators, applying special optimizations for specific projection operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."
   },
   {
+    "id": "R042",
     "rule": "CALC_MERGE",
     "description": "Merges adjacent calculation operators. If two CALC operators are adjacent, their calculation operations are combined into a single CALC operator.",
     "purpose": "To reduce the number of operators and simplify the query plan."
   },
   {
+    "id": "R043",
     "rule": "CALC_REMOVE",
     "description": "Removes redundant calculation operators. If a CALC operator performs no actual calculations or its calculations are redundant, it can be removed.",
     "purpose": "To simplify the query plan and reduce unnecessary operator overhead."
   },
   {
+    "id": "R044",
     "rule": "SORT_JOIN_TRANSPOSE",
     "description": "Transposes sort and JOIN operators, swapping the order of SORT and JOIN.",
     "purpose": "Depending on the specific scenario, decide whether to sort earlier or push sorting down or up. For example, if the JOIN result needs sorting, SORT may be pushed down before JOIN to sort smaller datasets."
   },
   {
+    "id": "R045",
     "rule": "SORT_PROJECT_TRANSPOSE",
     "description": "Transposes sort and projection operators, swapping the order of SORT and PROJECT.",
     "purpose": "Similar to SORT_JOIN_TRANSPOSE, depending on the specific scenario, decide the sorting position. For example, if the PROJECT result needs sorting, SORT may be pushed down before PROJECT."
   },
   {
+    "id": "R046",
     "rule": "SORT_UNION_TRANSPOSE",
     "description": "Transposes sort and UNION operators, swapping the order of SORT and UNION.",
     "purpose": "Similar to SORT_JOIN_TRANSPOSE, depending on the specific scenario, decide the sorting position. For example, if the UNION result needs sorting, SORT may be pushed down before UNION to sort smaller datasets."
   },
   {
+    "id": "R047",
     "rule": "SORT_REMOVE_CONSTANT_KEYS",
     "description": "Removes constant keys from sort keys. If sort keys contain constant expressions, they can be removed as constant keys have no effect on the sort result.",
     "purpose": "To simplify sorting operations and improve sorting efficiency."
   },
   {
+    "id": "R048",
     "rule": "SORT_REMOVE",
     "description": "Removes redundant sort operators. If sorting is unnecessary (e.g., the result set is already sorted, or the sorted result is not used in subsequent operations), SORT operators can be removed.",
     "purpose": "To reduce unnecessary sorting overhead."
   },
   {
+    "id": "R049",
     "rule": "SORT_INSTANCE",
     "description": "Instance-specific optimization of sort operators, applying special optimizations for specific sort operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."
   },
   {
+    "id": "R050",
     "rule": "SORT_FETCH_ZERO_INSTANCE",
     "description": "Optimizes sort operators with FETCH 0. FETCH 0 means retrieving only the first 0 rows, effectively requiring no results, making sorting unnecessary.",
     "purpose": "For FETCH 0 scenarios, directly remove sorting operations to avoid unnecessary computation."
   },
   {
+    "id": "R051",
     "rule": "UNION_MERGE",
     "description": "Merges adjacent UNION operators. If two UNION operators are adjacent, they are merged into a single UNION operator.",
     "purpose": "To reduce the number of operators and simplify the query plan."
   },
   {
+    "id": "R052",
     "rule": "UNION_REMOVE",
     "description": "Removes redundant UNION operators. In certain cases, UNION operations may be redundant and can be removed, such as UNION of the same data set with itself.",
     "purpose": "To simplify the query plan and reduce unnecessary operator overhead."
   },
   {
+    "id": "R053",
     "rule": "UNION_TO_DISTINCT",
     "description": "Converts UNION ALL to DISTINCT UNION (or directly uses DISTINCT). If the purpose of UNION is deduplication and UNION ALL is used, it can be converted to DISTINCT UNION or directly use DISTINCT.",
     "purpose": "To choose a more appropriate deduplication method based on actual requirements. DISTINCT UNION may perform better in some databases."
   },
   {
+    "id": "R054",
     "rule": "UNION_PULL_UP_CONSTANTS",
     "description": "Pulls up constant expressions in UNION operators, similar to AGGREGATE_ANY_PULL_UP_CONSTANTS, extracting constant parts from UNION branches to outside the UNION operator.",
     "purpose": "Possibly to facilitate constant folding or the application of other upper-level optimization rules."
   },
   {
+    "id": "R055",
     "rule": "UNION_INSTANCE",
     "description": "Instance-specific optimization of UNION operators, applying special optimizations for specific UNION operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."
   },
   {
+    "id": "R056",
     "rule": "INTERSECT_INSTANCE",
     "description": "Instance-specific optimization of INTERSECT operators, applying special optimizations for specific INTERSECT operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."
   },
   {
+    "id": "R057",
     "rule": "MINUS_INSTANCE",
     "description": "Instance-specific optimization of MINUS operators, applying special optimizations for specific MINUS operator instances.",
     "purpose": "To improve execution efficiency in specific scenarios."

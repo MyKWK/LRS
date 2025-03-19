@@ -1,0 +1,26 @@
+{
+  "bug_id": "66f75d8394db80e6",
+  "timestamp": "2024-05-20T00:32:00Z",
+  "queries": {
+    "original": {
+      "sql": "select all lineitem.l_shipinstruct, lineitem.l_extendedprice, lineitem.l_comment from lineitem where (coalesce(lineitem.l_shipmode, null)) not in (lineitem.l_commitdate)",
+      "result_count": 5805,
+    },
+    "rewritten": {
+      "sql": "SELECT l_shipinstruct, l_extendedprice, l_comment FROM lineitem WHERE NOT CASE WHEN l_shipmode IS NOT NULL THEN CAST(l_shipmode AS CHAR) ELSE NULL END = l_commitdate;",
+      "result_count": 0,
+    }
+  },
+  "applied_rules": [
+    {
+      "rule_id": "R020",
+      "rule_name": "FILTER_REDUCE_EXPRESSIONS",
+      "confidence": "high"
+    },
+    {
+      "rule_id": "R021",
+      "rule_name": "PROJECT_REDUCE_EXPRESSIONS",
+      "confidence": "high"
+    }
+  ],
+}
