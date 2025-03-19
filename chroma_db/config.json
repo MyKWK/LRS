@@ -1,0 +1,6 @@
+{
+  "chroma_db_impl": "duckdb+parquet",
+  "persist_directory": "./chroma_db",
+  "collection_name": "query_templates",
+  "anonymized_telemetry": false
+}
