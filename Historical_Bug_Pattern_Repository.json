@@ -1,8 +1,7 @@
-// This is an example
 {
   "pattern_id": "3b86373132f3a734",
   "template_id": "2171ff9b6557e952",
   "record_id": "66f75d8394db80e6",
   "RuleIdList": "R020,R021",
-  "score": 0.85,
+  "score": 0.85
 }

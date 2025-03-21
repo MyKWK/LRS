@@ -2,8 +2,231 @@ import json
 import os
 import sys
 import openai
-
+import re
+import numpy as np
+import hnswlib
+import pickle
+import os
+import sqlparse
 from LAQR.Rules import RulePool, Rule
+from sentence_transformers import SentenceTransformer
+
+def find_similar_templates(abstracted_query, top_k=5):
+    model_name = 'all-MiniLM-L6-v2'
+    embedding_dim = 384
+    index_path = 'sql_templates_hnsw.bin'
+    mapping_path = 'template_id_mapping.pkl'
+
+    model = SentenceTransformer(model_name)
+
+    if not os.path.exists(index_path) or not os.path.exists(mapping_path):
+        raise FileNotFoundError("Index files not found. Please build the index first.")
+
+    query_vector = model.encode([abstracted_query])[0]
+
+    index = hnswlib.Index(space='cosine', dim=embedding_dim)
+    index.load_index(index_path)
+
+    with open(mapping_path, 'rb') as f:
+        id_to_template_map = pickle.load(f)
+
+    labels, distances = index.knn_query(query_vector.reshape(1, -1), k=top_k)
+
+    results = []
+    for idx, (label, distance) in enumerate(zip(labels[0], distances[0])):
+        template_id = id_to_template_map[label]
+        similarity_score = 1 - distance
+        results.append({
+            'template_id': template_id,
+            'similarity_score': similarity_score
+        })
+
+    return results
+
+def build_template_index(templates_data):
+    model_name = 'all-MiniLM-L6-v2'
+    embedding_dim = 384
+
+    model = SentenceTransformer(model_name)
+
+    template_texts = [item['template_text'] for item in templates_data]
+    template_ids = [item['template_id'] for item in templates_data]
+
+    embeddings = model.encode(template_texts)
+
+    index = hnswlib.Index(space='cosine', dim=embedding_dim)
+    index.init_index(max_elements=len(template_texts), ef_construction=200, M=16)
+    index.add_items(embeddings, np.arange(len(template_texts)))
+
+    index.set_ef(50)
+    index.save_index('sql_templates_hnsw.bin')
+
+    id_to_template_map = {i: template_id for i, template_id in enumerate(template_ids)}
+    with open('template_id_mapping.pkl', 'wb') as f:
+        pickle.dump(id_to_template_map, f)
+
+    return "Index built successfully"
+
+def get_most_similar_template_id(abstracted_query):
+    similar_templates = find_similar_templates(abstracted_query, top_k=1)
+    if similar_templates:
+        return similar_templates[0]['template_id']
+    return None
+
+def abstract_sql_query(query):
+    formatted_query = sqlparse.format(query, keyword_case='upper', identifier_case='lower', reindent=True)
+
+    parsed = sqlparse.parse(formatted_query)[0]
+
+    abstracted = re.sub(r"'[^']*'", "'VALUE'", formatted_query)
+
+    abstracted = re.sub(r'(?<![a-zA-Z0-9_])(\d+(\.\d+)?)(?![a-zA-Z0-9_])', 'NUM', abstracted)
+
+    abstracted = re.sub(r'IN\s*\([^)]*\)', 'IN (LIST)', abstracted)
+
+    abstracted = re.sub(r'BETWEEN\s+\S+\s+AND\s+\S+', 'BETWEEN NUM AND NUM', abstracted)
+
+    date_patterns = [
+        r'\d{4}-\d{2}-\d{2}',
+        r'\d{2}/\d{2}/\d{4}',
+        r'\d{2}-\d{2}-\d{4}'
+    ]
+    for pattern in date_patterns:
+        abstracted = re.sub(pattern, 'DATE', abstracted)
+
+    abstracted = re.sub(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', 'TIMESTAMP', abstracted)
+
+    query_type = _identify_query_type(parsed)
+
+    abstracted = f"{query_type}:\n{abstracted}"
+
+    return abstracted
+
+def _identify_query_type(parsed_stmt):
+    first_token = parsed_stmt.token_first()
+    if first_token is None:
+        return "UNKNOWN"
+
+    keyword = first_token.value.upper()
+
+    if keyword == 'SELECT':
+        has_join = any(token.value.upper().find('JOIN') >= 0 for token in parsed_stmt.tokens)
+
+        has_group_by = any(token.value.upper().find('GROUP BY') >= 0 for token in parsed_stmt.tokens)
+
+        has_aggregation = any(token.value.upper().find('COUNT(') >= 0
+                             or token.value.upper().find('SUM(') >= 0
+                             or token.value.upper().find('AVG(') >= 0
+                             or token.value.upper().find('MAX(') >= 0
+                             or token.value.upper().find('MIN(') >= 0
+                             for token in parsed_stmt.flatten())
+
+        if has_join:
+            if has_group_by or has_aggregation:
+                return "ANALYTICAL_JOIN_QUERY"
+            return "JOIN_QUERY"
+        elif has_group_by or has_aggregation:
+            return "AGGREGATION_QUERY"
+        else:
+            return "SIMPLE_SELECT_QUERY"
+
+    elif keyword == 'INSERT':
+        return "INSERT_QUERY"
+    elif keyword == 'UPDATE':
+        return "UPDATE_QUERY"
+    elif keyword == 'DELETE':
+        return "DELETE_QUERY"
+    elif keyword == 'CREATE':
+        if any(token.value.upper().find('TABLE') >= 0 for token in parsed_stmt.tokens):
+            return "CREATE_TABLE_QUERY"
+        elif any(token.value.upper().find('INDEX') >= 0 for token in parsed_stmt.tokens):
+            return "CREATE_INDEX_QUERY"
+        else:
+            return "CREATE_QUERY"
+    elif keyword == 'ALTER':
+        return "ALTER_QUERY"
+    elif keyword == 'DROP':
+        return "DROP_QUERY"
+    else:
+        return "UNKNOWN_QUERY"
+
+
+def abstract_sql_query(query):
+    formatted_query = sqlparse.format(query, keyword_case='upper', identifier_case='lower', reindent=True)
+
+    parsed = sqlparse.parse(formatted_query)[0]
+
+    abstracted = re.sub(r"'[^']*'", "'VALUE'", formatted_query)
+
+    abstracted = re.sub(r'(?<![a-zA-Z0-9_])(\d+(\.\d+)?)(?![a-zA-Z0-9_])', 'NUM', abstracted)
+
+    abstracted = re.sub(r'IN\s*\([^)]*\)', 'IN (LIST)', abstracted)
+
+    abstracted = re.sub(r'BETWEEN\s+\S+\s+AND\s+\S+', 'BETWEEN NUM AND NUM', abstracted)
+
+    date_patterns = [
+        r'\d{4}-\d{2}-\d{2}',
+        r'\d{2}/\d{2}/\d{4}',
+        r'\d{2}-\d{2}-\d{4}'
+    ]
+    for pattern in date_patterns:
+        abstracted = re.sub(pattern, 'DATE', abstracted)
+
+    abstracted = re.sub(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', 'TIMESTAMP', abstracted)
+
+    query_type = _identify_query_type(parsed)
+
+    abstracted = f"{query_type}:\n{abstracted}"
+
+    return abstracted
+
+def _identify_query_type(parsed_stmt):
+    first_token = parsed_stmt.token_first()
+    if first_token is None:
+        return "UNKNOWN"
+
+    keyword = first_token.value.upper()
+
+    if keyword == 'SELECT':
+        has_join = any(token.value.upper().find('JOIN') >= 0 for token in parsed_stmt.tokens)
+
+        has_group_by = any(token.value.upper().find('GROUP BY') >= 0 for token in parsed_stmt.tokens)
+
+        has_aggregation = any(token.value.upper().find('COUNT(') >= 0
+                             or token.value.upper().find('SUM(') >= 0
+                             or token.value.upper().find('AVG(') >= 0
+                             or token.value.upper().find('MAX(') >= 0
+                             or token.value.upper().find('MIN(') >= 0
+                             for token in parsed_stmt.flatten())
+
+        if has_join:
+            if has_group_by or has_aggregation:
+                return "ANALYTICAL_JOIN_QUERY"
+            return "JOIN_QUERY"
+        elif has_group_by or has_aggregation:
+            return "AGGREGATION_QUERY"
+        else:
+            return "SIMPLE_SELECT_QUERY"
+
+    elif keyword == 'INSERT':
+        return "INSERT_QUERY"
+    elif keyword == 'UPDATE':
+        return "UPDATE_QUERY"
+    elif keyword == 'DELETE':
+        return "DELETE_QUERY"
+    elif keyword == 'CREATE':
+        if any(token.value.upper().find('TABLE') >= 0 for token in parsed_stmt.tokens):
+            return "CREATE_TABLE_QUERY"
+        elif any(token.value.upper().find('INDEX') >= 0 for token in parsed_stmt.tokens):
+            return "CREATE_INDEX_QUERY"
+        else:
+            return "CREATE_QUERY"
+    elif keyword == 'ALTER':
+        return "ALTER_QUERY"
+    elif keyword == 'DROP':
+        return "DROP_QUERY"
+    else:
+        return "UNKNOWN_QUERY"
 
 
 def query_gpt4(question):
@@ -134,6 +357,7 @@ def generate(rewritten_queries: str, count: int):
 
 
 def process_query(query, count):
+
     rewritten_queries = rewrite(query)
     result_queries = generate(rewritten_queries, count)
     return "; ".join(result_queries)
