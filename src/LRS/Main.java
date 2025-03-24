@@ -631,9 +631,7 @@ public final class Main {
         final AtomicBoolean someOneFails = new AtomicBoolean(false);
 
         for (int i = 0; i < 5; i++) {
-            System.out.println("------hxj-----");
-            
-            
+
             final String databaseName = "tpcd";
             
             final long seed;

@@ -72,7 +72,6 @@ public abstract class ProviderAdapter<G extends GlobalState<O, ? extends Abstrac
                 }
             }
         } finally {
-            System.out.println("-----------wxh---------");
             globalState.getConnection().close();
         }
         return null;
