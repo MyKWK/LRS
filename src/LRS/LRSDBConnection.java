@@ -1,6 +1,6 @@
 package LRS;
 
-public interface SQLancerDBConnection extends AutoCloseable {
+public interface LRSDBConnection extends AutoCloseable {
 
     String getDatabaseVersion() throws Exception;
 }

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import LRS.common.query.ExpectedErrors;
 import LRS.common.query.SQLQueryAdapter;
-import LRS.common.query.SQLancerResultSet;
+import LRS.common.query.LRSResultSet;
 
 public final class ComparatorHelper {
 
@@ -56,7 +56,7 @@ public final class ComparatorHelper {
         boolean canonicalizeString = state.getOptions().canonicalizeSqlString();
         SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors, true, canonicalizeString);
         List<String> resultSet = new ArrayList<>();
-        SQLancerResultSet result = null;
+        LRSResultSet result = null;
         try {
             result = q.executeAndGet(state);
             if (result == null) {
@@ -109,7 +109,7 @@ public final class ComparatorHelper {
         boolean canonicalizeString = state.getOptions().canonicalizeSqlString();
         SQLQueryAdapter q = new SQLQueryAdapter(queryString, errors, true, canonicalizeString);
 
-        SQLancerResultSet result = null;
+        LRSResultSet result = null;
         ResultSet ResultSet = null;
         try {
 

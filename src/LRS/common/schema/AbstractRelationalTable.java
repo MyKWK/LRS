@@ -5,7 +5,7 @@ import java.util.List;
 import LRS.IgnoreMeException;
 import LRS.SQLGlobalState;
 import LRS.common.query.SQLQueryAdapter;
-import LRS.common.query.SQLancerResultSet;
+import LRS.common.query.LRSResultSet;
 
 public class AbstractRelationalTable<C extends AbstractTableColumn<?, ?>, I extends TableIndex, G extends SQLGlobalState<?, ?>>
         extends AbstractTable<C, I, G> {
@@ -18,7 +18,7 @@ public class AbstractRelationalTable<C extends AbstractTableColumn<?, ?>, I exte
     public long getNrRows(G globalState) {
         if (rowCount == NO_ROW_COUNT_AVAILABLE) {
             SQLQueryAdapter q = new SQLQueryAdapter("SELECT COUNT(*) FROM " + name);
-            try (SQLancerResultSet query = q.executeAndGet(globalState)) {
+            try (LRSResultSet query = q.executeAndGet(globalState)) {
                 if (query == null) {
                     throw new IgnoreMeException();
                 }

@@ -124,7 +124,7 @@ public class SQLQueryAdapter extends Query<SQLConnection> {
     }
 
     @Override
-    public <G extends GlobalState<?, ?, SQLConnection>> SQLancerResultSet executeAndGet
+    public <G extends GlobalState<?, ?, SQLConnection>> LRSResultSet executeAndGet
             (G globalState, String... fills) throws SQLException
     {
         Statement s; 
@@ -150,7 +150,7 @@ public class SQLQueryAdapter extends Query<SQLConnection> {
             if (result == null) {
                 return null;
             }
-            return new SQLancerResultSet(result);
+            return new LRSResultSet(result);
         } catch (SQLTimeoutException e) {
             
             throw new RuntimeException("Query timed out after 15 seconds", e);

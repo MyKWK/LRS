@@ -13,7 +13,7 @@ import LRS.common.oracle.CompositeTestOracle;
 import LRS.common.oracle.TestOracle;
 import LRS.common.schema.AbstractSchema;
 
-public abstract class ProviderAdapter<G extends GlobalState<O, ? extends AbstractSchema<G, ?>, C>, O extends DBMSSpecificOptions<? extends OracleFactory<G>>, C extends SQLancerDBConnection>
+public abstract class ProviderAdapter<G extends GlobalState<O, ? extends AbstractSchema<G, ?>, C>, O extends DBMSSpecificOptions<? extends OracleFactory<G>>, C extends LRSDBConnection>
         implements DatabaseProvider<G, O, C> {
 
     private final Class<G> globalClass;

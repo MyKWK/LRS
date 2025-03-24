@@ -2,7 +2,7 @@ package LRS;
 
 import LRS.common.log.LoggableFactory;
 
-public interface DatabaseProvider<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends SQLancerDBConnection> {
+public interface DatabaseProvider<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends LRSDBConnection> {
 
     /**
      * Gets the the {@link GlobalState} class.

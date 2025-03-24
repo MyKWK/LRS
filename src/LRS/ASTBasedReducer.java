@@ -17,7 +17,7 @@ import LRS.transformations.SimplifyConstant;
 import LRS.transformations.SimplifyExpressions;
 import LRS.transformations.Transformation;
 
-public class ASTBasedReducer<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends SQLancerDBConnection>
+public class ASTBasedReducer<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends LRSDBConnection>
         implements Reducer<G> {
 
     private final DatabaseProvider<G, O, C> provider;

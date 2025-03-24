@@ -81,7 +81,7 @@ public class MainOptions {
     @Parameter(names = "--print-progress-information", description = "Whether to print progress information such as the number of databases generated or queries issued", arity = 1)
     private boolean printProgressInformation = true; // NOPMD
 
-    @Parameter(names = "--print-progress-summary", description = "Whether to print an execution summary when exiting SQLancer", arity = 1)
+    @Parameter(names = "--print-progress-summary", description = "Whether to print an execution summary when exiting LRS", arity = 1)
     private boolean printProgressSummary; // NOPMD
 
     @Parameter(names = "--timeout-seconds", description = "The timeout in seconds")

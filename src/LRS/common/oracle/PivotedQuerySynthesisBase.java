@@ -5,13 +5,13 @@ import java.util.List;
 
 import LRS.GlobalState;
 import LRS.IgnoreMeException;
-import LRS.SQLancerDBConnection;
+import LRS.LRSDBConnection;
 import LRS.common.query.ExpectedErrors;
 import LRS.common.query.Query;
-import LRS.common.query.SQLancerResultSet;
+import LRS.common.query.LRSResultSet;
 import LRS.common.schema.AbstractRowValue;
 
-public abstract class PivotedQuerySynthesisBase<S extends GlobalState<?, ?, C>, R extends AbstractRowValue<?, ?, ?>, E, C extends SQLancerDBConnection>
+public abstract class PivotedQuerySynthesisBase<S extends GlobalState<?, ?, C>, R extends AbstractRowValue<?, ?, ?>, E, C extends LRSDBConnection>
         implements TestOracle<S> {
 
     protected final ExpectedErrors errors = new ExpectedErrors();
@@ -64,7 +64,7 @@ public abstract class PivotedQuerySynthesisBase<S extends GlobalState<?, ?, C>, 
      *             if the query unexpectedly fails
      */
     private boolean containsRows(Query<C> query) throws Exception {
-        try (SQLancerResultSet result = query.executeAndGet(globalState)) {
+        try (LRSResultSet result = query.executeAndGet(globalState)) {
             if (result == null) {
                 throw new IgnoreMeException();
             }

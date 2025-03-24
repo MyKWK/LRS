@@ -7,7 +7,7 @@ import java.util.List;
 
 import LRS.common.query.Query;
 
-public class StatementReducer<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends SQLancerDBConnection>
+public class StatementReducer<G extends GlobalState<O, ?, C>, O extends DBMSSpecificOptions<?>, C extends LRSDBConnection>
         implements Reducer<G> {
     private final DatabaseProvider<G, O, C> provider;
     private boolean observedChange;

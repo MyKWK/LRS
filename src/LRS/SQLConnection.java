@@ -5,7 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class SQLConnection implements SQLancerDBConnection {
+public class SQLConnection implements LRSDBConnection {
 
     private final Connection connection;
 

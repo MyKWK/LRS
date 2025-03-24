@@ -1,10 +1,10 @@
 package LRS.common.query;
 
 import LRS.GlobalState;
-import LRS.SQLancerDBConnection;
+import LRS.LRSDBConnection;
 import LRS.common.log.Loggable;
 
-public abstract class Query<C extends SQLancerDBConnection> implements Loggable {
+public abstract class Query<C extends LRSDBConnection> implements Loggable {
 
     /**
      * Gets the query string, which is guaranteed to be terminated with a semicolon.
@@ -36,7 +36,7 @@ public abstract class Query<C extends SQLancerDBConnection> implements Loggable 
         return getQueryString();
     }
 
-    public <G extends GlobalState<?, ?, C>> SQLancerResultSet executeAndGet(G globalState, String... fills)
+    public <G extends GlobalState<?, ?, C>> LRSResultSet executeAndGet(G globalState, String... fills)
             throws Exception {
         throw new AssertionError();
     }
@@ -46,7 +46,7 @@ public abstract class Query<C extends SQLancerDBConnection> implements Loggable 
         return execute(globalState);
     }
 
-    public <G extends GlobalState<?, ?, C>> SQLancerResultSet executeAndGetLogged(G globalState) throws Exception {
+    public <G extends GlobalState<?, ?, C>> LRSResultSet executeAndGetLogged(G globalState) throws Exception {
         logQueryString(globalState);
         return executeAndGet(globalState);
     }

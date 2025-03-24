@@ -1,11 +1,11 @@
 package LRS;
 
 import LRS.common.query.Query;
-import LRS.common.query.SQLancerResultSet;
+import LRS.common.query.LRSResultSet;
 import LRS.common.schema.AbstractSchema;
 import LRS.common.schema.AbstractTable;
 
-public abstract class GlobalState<O extends DBMSSpecificOptions<?>, S extends AbstractSchema<?, ?>, C extends SQLancerDBConnection> {
+public abstract class GlobalState<O extends DBMSSpecificOptions<?>, S extends AbstractSchema<?, ?>, C extends LRSDBConnection> {
 
     protected C databaseConnection;
     private Randomly r;
@@ -110,9 +110,9 @@ public abstract class GlobalState<O extends DBMSSpecificOptions<?>, S extends Ab
         return success;
     }
 
-    public SQLancerResultSet executeStatementAndGet(Query<C> q, String... fills) throws Exception {
+    public LRSResultSet executeStatementAndGet(Query<C> q, String... fills) throws Exception {
         ExecutionTimer timer = executePrologue(q);
-        SQLancerResultSet result = manager.executeAndGet(q, fills);
+        LRSResultSet result = manager.executeAndGet(q, fills);
         boolean success = result != null;
         if (success) {
             result.registerEpilogue(() -> {

@@ -22,7 +22,7 @@ import LRS.StatementExecutor;
 import LRS.common.query.ExpectedErrors;
 import LRS.common.query.SQLQueryAdapter;
 import LRS.common.query.SQLQueryProvider;
-import LRS.common.query.SQLancerResultSet;
+import LRS.common.query.LRSResultSet;
 import LRS.tidb.TiDBOptions.TiDBOracleFactory;
 import LRS.tidb.TiDBProvider.TiDBGlobalState;
 import LRS.tidb.TiDBSchema.TiDBTable;
@@ -245,7 +245,7 @@ public class TiDBProvider extends SQLProviderAdapter<TiDBGlobalState, TiDBOption
         }
 
         SQLQueryAdapter q = new SQLQueryAdapter("EXPLAIN FORMAT=brief " + selectStr);
-        try (SQLancerResultSet rs = q.executeAndGet(globalState)) {
+        try (LRSResultSet rs = q.executeAndGet(globalState)) {
             if (rs != null) {
                 while (rs.next()) {
                     String targetQueryPlan = rs.getString(1).replace("├─", "").replace("└─", "").replace("│", "").trim()

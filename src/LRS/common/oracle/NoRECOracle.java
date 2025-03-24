@@ -14,7 +14,7 @@ import LRS.common.ast.newast.Select;
 import LRS.common.gen.NoRECGenerator;
 import LRS.common.query.ExpectedErrors;
 import LRS.common.query.SQLQueryAdapter;
-import LRS.common.query.SQLancerResultSet;
+import LRS.common.query.LRSResultSet;
 import LRS.common.schema.AbstractSchema;
 import LRS.common.schema.AbstractTable;
 import LRS.common.schema.AbstractTableColumn;
@@ -128,7 +128,7 @@ public class NoRECOracle<Z extends Select<J, E, T, C>, J extends Join<E, T, C>, 
         }
 
         int count = 0;
-        try (SQLancerResultSet rs = q.executeAndGet(state)) {
+        try (LRSResultSet rs = q.executeAndGet(state)) {
             if (rs == null) {
                 return -1;
             } else {
@@ -156,7 +156,7 @@ public class NoRECOracle<Z extends Select<J, E, T, C>, J extends Join<E, T, C>, 
         }
 
         int count = 0;
-        try (SQLancerResultSet rs = q.executeAndGet(state)) {
+        try (LRSResultSet rs = q.executeAndGet(state)) {
             if (rs == null) {
                 return -1;
             } else {

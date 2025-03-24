@@ -4,12 +4,12 @@ import java.io.Closeable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class SQLancerResultSet implements Closeable {
+public class LRSResultSet implements Closeable {
 
     public ResultSet rs;
     private Runnable runnableEpilogue;
 
-    public SQLancerResultSet(ResultSet rs) {
+    public LRSResultSet(ResultSet rs) {
         this.rs = rs;
     }
 
